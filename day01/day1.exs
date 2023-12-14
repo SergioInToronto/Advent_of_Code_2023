@@ -40,32 +40,26 @@ to_num = fn digit ->
 end
 
 digit = "[0-9]|one|two|three|four|five|six|seven|eight|nine"
+digit_rev = "enin|thgie|neves|xis|evif|ruof|eerht|owt|eno|[0-9]"
 {:ok, re_first} = Regex.compile("(#{digit})")
-# {:ok, re_last} = Regex.compile("(#{digit})[^#{digit}]*$")
-{:ok, re_last} = Regex.compile("(#{digit})(?:(?!#{digit})[a-z])*$")
+{:ok, re_last_rev} = Regex.compile("(#{digit_rev})")
 
 lines = String.split(String.trim(contents), "\n")
 numbers = Enum.map(lines, fn line ->
-  IO.puts(line)
   [_, d1] = Regex.run(re_first, line)
-  # IO.puts(d1)
-  [_, d2] = Regex.run(re_last, line)
-  # IO.puts(d2)
-  IO.puts(d1 <> " " <> d2)
-  IO.puts(to_num.(d1 <> d2))
-
-  # if line == "7n" do
-  #   :timer.sleep(7000)
-  # end
-
+  [_, d2] = Regex.run(re_last_rev, String.reverse(line))
+  d2 = String.reverse(d2)
   d1 <> d2
 end)
 
 IO.puts("Finished. Calcing total...")
 
-total = Enum.sum(Enum.map(numbers, fn val -> String.to_integer(to_num.(val)) end))
+numbers = Enum.map(numbers, fn val -> String.to_integer(to_num.(val)) end)
+total = Enum.sum(numbers)
 IO.puts("Part 2: " <> Integer.to_string(total))
 
 # 53338 is wrong :(
 # 53355 is wrong :(
-# I give up for now
+# Found the final problem. It's still the "oneight" problem
+# "twone" matches "two" instead of "one" for the last digit
+# solved it lazily by reversing string before searching
