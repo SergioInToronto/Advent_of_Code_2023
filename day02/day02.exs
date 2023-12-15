@@ -39,7 +39,7 @@ possible_game_ids = Enum.map(lines, fn line ->
   IO.write("Game " <> game_no <> "... ")
 
   possible = game_possible?.(game)
-  IO.puts(possible)
+  IO.puts(possible && "possible" || "impossible")
   if possible do
     game_no
   else
@@ -52,3 +52,37 @@ possible_game_ids = possible_game_ids
   |> Enum.map(&String.to_integer/1)
 
 IO.puts("\nPart 1: #{Enum.sum(possible_game_ids)}")
+
+
+
+###### Part 2 ######
+
+cube_maxes = fn cube_counts ->
+  init = %{"red" => 0, "green" => 0, "blue" => 0}
+  result = Enum.reduce(cube_counts, init, fn (el, counts) ->
+    [_, count, color] = Regex.run(re_cubes, el)
+    # update syntax for Maps is unexpected to me:
+    count = Enum.max([counts[color], String.to_integer(count)])
+    %{counts | color => count}
+  end)
+  [result["red"], result["green"], result["blue"]]
+end
+
+calc_game_power = fn line ->
+  [_, _, game] = Regex.run(re_line, line)
+  rounds = String.split(game, "; ")
+  draws = Enum.map(rounds, fn round ->
+    String.split(round, ", ")
+  end)
+
+  draws
+  |> List.flatten()
+  |> cube_maxes.()
+  |> IO.inspect()
+  |> then(fn val ->
+    Enum.product(val)
+  end)
+end
+
+powers = Enum.map(lines, &calc_game_power.(&1))
+IO.puts("Part 2: #{Enum.sum(powers)}")
